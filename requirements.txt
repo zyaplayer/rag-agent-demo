@@ -1,0 +1,15 @@
+langchain==0.2.14
+langchain-core==0.2.33
+langchain-community==0.2.12
+langchain-openai==0.1.22
+
+pymilvus==2.4.4
+sentence-transformers==2.7.0
+
+fastapi==0.110.0
+uvicorn==0.29.0
+
+streamlit==1.35.0
+requests==2.31.0
+
+pydantic==2.7.1
