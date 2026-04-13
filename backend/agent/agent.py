@@ -10,7 +10,8 @@ from pymilvus import utility
 from backend.config import Config
 from backend.rag.embedding import embed_texts
 from backend.rag.milvus_stores import MilvusVectorStore
-
+from backend.rag.retriever import AdvancedRetriever
+from backend.rag.loader import load_documents
 
 @dataclass(frozen=True)
 class RetrievedChunk:
@@ -67,9 +68,17 @@ class RAGAgent:
             temperature=0.2,
         )
 
+        documents = load_documents()
+
+        self.retriever = AdvancedRetriever(
+            vectordb=self.store,
+            documents=documents,
+            llm=self.llm
+        )
+
     def retrieve(self, query: str, top_k: Optional[int] = None) -> List[RetrievedChunk]:
         k = top_k or self.top_k
-        docs: List[Document] = self.store.search(query, top_k=k)
+        docs: List[Document] = self.retriever.retrieve(query, top_k=k)
 
         chunks: List[RetrievedChunk] = []
         for d in docs:

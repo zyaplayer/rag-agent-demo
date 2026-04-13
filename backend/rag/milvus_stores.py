@@ -56,6 +56,8 @@ class MilvusVectorStore:
     def create_index(self) -> None:
         if self.collection is None:
             raise ValueError("Collection not initialized. Call create_collection first.")
+        if self.collection.indexes:
+            return
 
         index_params = {
             "metric_type": "IP",

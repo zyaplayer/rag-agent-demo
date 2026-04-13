@@ -1,6 +1,10 @@
 import json
 import requests
 import streamlit as st
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 st.set_page_config(page_title="RAG Agent 知识库助理", layout="centered")
 

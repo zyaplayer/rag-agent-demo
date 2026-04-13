@@ -1,15 +1,46 @@
 import re
-from typing import List, Union, Dict
-from bs4 import BeautifulSoup
+from typing import Dict, List, Union
 
-SAMPLE_DATA = """
-<h1>项目概述</h1>
-<p>这是关于 PyTorch 2.5+ 和大模型微调的实战课程。</p>
-<p><b>PyTorch</b> 是一个强大的深度学习框架。</p>
-<p>课程内容包括理论、实战项目，并紧跟最新技术，如 <a href="#">torch.compile</a>。</p>
-<p>请注意：本课程适合具有一定理论基础但缺乏编程经验的学员。</p>
-<p>联系方式：<a href="mailto:info@example.com">info@example.com</a></p>
-"""
+from bs4 import BeautifulSoup
+from langchain_core.documents import Document
+
+
+class Cleaner:
+    def __init__(self, chunk_size=200, chunk_overlap=20):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+
+    def process(self, docs):
+        """
+        docs: List[Document]（来自 loader）
+        return: List[Document]（清洗后的）
+        """
+        cleaned_docs = []
+
+        for doc in docs:
+            text = doc.page_content
+
+            # 1. 清洗文本
+            text = clean_text(text)
+
+            # 2. 分句
+            sentences = split_sentences(text)
+
+            # 3. 分块
+            chunks = chunk_text(
+                sentences,
+                self.chunk_size,
+                self.chunk_overlap
+            )
+
+            # 4. 重新封装为 Document（保持 LangChain 兼容）
+            for chunk in chunks:
+                cleaned_docs.append(
+                    Document(page_content=chunk, metadata=dict(doc.metadata))
+                )
+
+        return cleaned_docs
+
 
 
 def clean_text(text: str) -> str:
@@ -49,18 +80,27 @@ def chunk_text(sentences: List[str], chunk_size: int, chunk_overlap: int) -> Lis
 
 def process_data(
     data: Union[str, List[str]],
+    *,
     chunk_size: int = 200,
     chunk_overlap: int = 20,
     source: str = "unknown",
 ) -> List[Dict[str, str]]:
-    if isinstance(data, list):
-        data = " ".join(data)
+    texts = [data] if isinstance(data, str) else data
+    results: List[Dict[str, str]] = []
 
-    cleaned_text = clean_text(data)
-    sentences = split_sentences(cleaned_text)
-    chunks = chunk_text(sentences, chunk_size, chunk_overlap)
-    return [{"text": chunk, "source": source} for chunk in chunks]
+    for text in texts:
+        cleaned = clean_text(text)
+        sentences = split_sentences(cleaned)
+        chunks = chunk_text(sentences, chunk_size, chunk_overlap)
+        for chunk in chunks:
+            results.append({"text": chunk, "source": source})
+
+    return results
 
 
-def get_sample_data() -> str:
-    return SAMPLE_DATA
+def get_sample_data() -> List[str]:
+    return [
+        "Milvus 是一个面向向量检索场景的数据库，常用于 RAG 系统。",
+        "FastAPI 适合构建 Python API，常与 Streamlit 前端联调。",
+        "RAG 的核心流程包括加载文档、清洗切分、向量化、检索和生成。",
+    ]

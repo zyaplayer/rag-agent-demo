@@ -21,7 +21,7 @@
 
 ---
 
-## 2. 手动启动（推荐先理解）
+## 2. 手动启动
 
 ### 2.1 启动 Milvus
 
@@ -84,38 +84,7 @@ docker compose down -v
 
 ---
 
-## 4. 一键脚本方案
-
-项目根目录已提供：
-
-- `start.ps1`：启动 Milvus + 可选初始化 + 启动后端/前端
-- `stop.ps1`：停止后端/前端并关闭 Milvus（可选清库）
-
-### 4.1 首次运行脚本（如果遇到执行策略限制）
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-```
-
-### 4.2 使用方式
-
-```powershell
-# 启动（默认会初始化数据库）
-.\start.ps1
-
-# 启动但跳过 init_db
-.\start.ps1 -SkipInitDB
-
-# 关闭后端/前端 + 关闭 Milvus
-.\stop.ps1
-
-# 关闭并清空 Milvus 卷数据
-.\stop.ps1 -RemoveVolumes
-```
-
----
-
-## 5. 常见问题
+## 4. 常见问题
 
 - `POST /chat/query 404`：前端用了旧接口，改为 `POST /api/chat`
 - `MilvusException localhost:19530`：Milvus 未启动或端口不通
